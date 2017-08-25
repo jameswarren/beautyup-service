@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>My awesome autocomplete</title>
+    <link href="http://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" rel="stylesheet" />
+</head>
+<body>
+    <input type="text" id="autocomplete" />
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <script src="http://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script
+    <script src="script.js"></script>
+    <script>
+      $('#autocomplete').autocomplete({
+          source: function(req, res) {
+              $.get('http://localhost:8080/products?pattern=' + req.term.replace(/ /g, '+'), function(r) {
+                  return res(r);
+              }, 'json');
+          },
+          minLength: 2,
+          select: function (e, ui) {
+              $(e.target).val(ui.item.name);
+              return false;
+          }
+      }).autocomplete('instance')._renderItem = function (ul, item) {
+          return $('<li>')
+              .append('<a>' + item.name + '</a>')
+              .appendTo(ul);
+      };
+    </script>
+</body>
+</html>

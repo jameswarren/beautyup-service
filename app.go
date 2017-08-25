@@ -16,13 +16,14 @@ type App struct {
     DB     *sql.DB
 }
 
-func (a *App) Initialize(user, password, dbname string) {
-  connectionString :=
-      //fmt.Sprintf("user=postgres password= dbname=postgres sslmode=disable")
-      // TODO: FIX ME
-      fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", user, password, dbname)
+func (a *App) Initialize(host, user, password, dbname, sslmode string) {
+    connectionString :=
+      fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=%s", host, user, password, dbname, sslmode)
+
+
 
     var err error
+
     a.DB, err = sql.Open("postgres", connectionString)
     if err != nil {
         log.Fatal(err)
@@ -38,10 +39,6 @@ func (a *App) Run(addr string) {
 
 func (a *App) initializeRoutes() {
     a.Router.HandleFunc("/products", a.getProducts).Methods("GET")
-    // a.Router.HandleFunc("/product", a.createProduct).Methods("POST")
-    // a.Router.HandleFunc("/product/{id:[0-9]+}", a.getProduct).Methods("GET")
-    // a.Router.HandleFunc("/product/{id:[0-9]+}", a.updateProduct).Methods("PUT")
-    // a.Router.HandleFunc("/product/{id:[0-9]+}", a.deleteProduct).Methods("DELETE")
 }
 
 func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +49,6 @@ func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
         count = 10
     }
 
-  fmt.Printf("pattern=%s count=%d", pattern, count)
     products, err := getProducts(a.DB, pattern, count)
     if err != nil {
         respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -61,87 +57,6 @@ func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
 
     respondWithJSON(w, http.StatusOK, products)
 }
-
-// func (a *App) createProduct(w http.ResponseWriter, r *http.Request) {
-//     var p product
-//     decoder := json.NewDecoder(r.Body)
-//     if err := decoder.Decode(&p); err != nil {
-//         respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-//         return
-//     }
-//     defer r.Body.Close()
-//
-//     if err := p.createProduct(a.DB); err != nil {
-//         respondWithError(w, http.StatusInternalServerError, err.Error())
-//         return
-//     }
-//
-//     respondWithJSON(w, http.StatusCreated, p)
-// }
-
-// func (a *App) getProduct(w http.ResponseWriter, r *http.Request) {
-//     vars := mux.Vars(r)
-//     id, err := strconv.Atoi(vars["id"])
-//     if err != nil {
-//         respondWithError(w, http.StatusBadRequest, "Invalid product ID")
-//         return
-//     }
-//
-//     p := product{ID: id}
-//     if err := p.getProduct(a.DB); err != nil {
-//         switch err {
-//         case sql.ErrNoRows:
-//             respondWithError(w, http.StatusNotFound, "Product not found")
-//         default:
-//             respondWithError(w, http.StatusInternalServerError, err.Error())
-//         }
-//         return
-//     }
-//
-//     respondWithJSON(w, http.StatusOK, p)
-// }
-
-// func (a *App) updateProduct(w http.ResponseWriter, r *http.Request) {
-//     vars := mux.Vars(r)
-//     id, err := strconv.Atoi(vars["id"])
-//     if err != nil {
-//         respondWithError(w, http.StatusBadRequest, "Invalid product ID")
-//         return
-//     }
-//
-//     var p product
-//     decoder := json.NewDecoder(r.Body)
-//     if err := decoder.Decode(&p); err != nil {
-//         respondWithError(w, http.StatusBadRequest, "Invalid resquest payload")
-//         return
-//     }
-//     defer r.Body.Close()
-//     p.ID = id
-//
-//     if err := p.updateProduct(a.DB); err != nil {
-//         respondWithError(w, http.StatusInternalServerError, err.Error())
-//         return
-//     }
-//
-//     respondWithJSON(w, http.StatusOK, p)
-// }
-
-// func (a *App) deleteProduct(w http.ResponseWriter, r *http.Request) {
-//     vars := mux.Vars(r)
-//     id, err := strconv.Atoi(vars["id"])
-//     if err != nil {
-//         respondWithError(w, http.StatusBadRequest, "Invalid Product ID")
-//         return
-//     }
-//
-//     p := product{ID: id}
-//     if err := p.deleteProduct(a.DB); err != nil {
-//         respondWithError(w, http.StatusInternalServerError, err.Error())
-//         return
-//     }
-//
-//     respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
-// }
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
     respondWithJSON(w, code, map[string]string{"error": message})
