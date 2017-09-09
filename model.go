@@ -27,7 +27,7 @@ func getProducts(db *sql.DB, pattern string, count int) ([]product, error) {
 
 	for rows.Next() {
 		var p product
-		if err := rows.Scan(&p.ID, &p.Brand, &p.Name); err != nil {
+		if err := rows.Scan(&p.ID, &p.Brand, &p.Name, &p.Price, &p.Image); err != nil {
 			return nil, err
 		}
 		products = append(products, p)
