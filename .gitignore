@@ -1,3 +1,5 @@
 # Ignore all
+.idea
 .env
 beautyup-service
+vendor
